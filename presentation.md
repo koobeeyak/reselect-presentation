@@ -46,6 +46,8 @@ controls: true
 
 --
 
+[//]: # (refresher)
+
 <br><br>
 
 ```js
@@ -149,6 +151,8 @@ export ThisViewsComponent;
 
 --
 
+[//]: # (with this, let's go back, lets talk about the second point)
+
 ### Why do we use Redux?
 
 - *Application has a global state (the Redux store)*
@@ -204,27 +208,24 @@ If you develop with...
 [//]: # (That does take advantage of Redux's separation of state and state, but not the rest of what Redux has to offer)
 [//]: # (We're going to be looking at breaking up that pass of the huge state via selectors)
 
+<br><br>
 ```js
-// app/containers/SomeContainer.js
-
 const mapStateToProps = state => ({ state: ...state.MyBigAndImportantReducer })
 ```
 
 --
-<div> <pre>
-	<code>
-js
-// app/containers/SomeContainer.js
 
+<br><br>
+```js
 const mapStateToProps = state => ({
 	someData: selectSomeData(state.MyBigAndImportantReducer)
 })
-</pre>
-</code>
-</div>
+```
+
 --
 
 [//]: # (A use case where more users might be loaded at any moment)
+[//]: # (I want to keep going from this example, passing whole state in, into an example with selectors and then reselect)
 
 ```js
 // MyBigAndImportantReducer
@@ -243,20 +244,18 @@ const mapStateToProps = state => ({
 
 --
 
+[//]: # (Re-renders when user selects new filter or loads new users)
 ```js
 // app/containers/DisplayUsersContainer.js
 
 const mapStateToProps = state => ({ state: ...state.MyBigAndImportantReducer })
 ```
-
---
-
-[//]: # (Re-renders when user selects new filter or loads new users)
+<br>
 ```js
 // app/components/DisplayUsers.js
 
 filterUsers(filters, users) {
-	/* will return a list of users narrowed down by filters */
+	/* return a list of users narrowed down by filters */
 }
 
 render() {
@@ -275,13 +274,8 @@ render() {
 [//]: # (But let's go ahead and put it on the Emoji scale, and talk about that)
 [//]: # (If you don't want to end up passing too many props down into distant children, using Redux to get around this, leaves me to believe at the very least we can make some further improvements)
 
-### Emoji Scale
 
---
-
-### Emoji Scale
-
-# 🤷‍♂️ / 🤷‍♀️
+# 🤷‍♂️ &nbsp; 🤷‍♀️
 
 --
 
@@ -307,21 +301,7 @@ render() {
 --
 
 [//]: # (I don't know how I feel about this, in fact I think I feel worse)
-
-### Emoji Scale
-
-# 😶
-
---
-
 [//]: # (that's because we went back and tried to optimize here but we can't re-use those mapStateToProps calls)
-
-### Emoji Scale
-
-# 😣
-
---
-
 [//]: # (our first look at some selectors which are simple, they can live right in the reducer file they will query from, or can always separate them out)
 
 ```js
@@ -349,8 +329,145 @@ const mapStateToProps = state => ({
 --
 
 [//]: # (I hope that it has piqued your interest at least)
+[//]: # (filterUsers is just to take the example of what we had in component, arbitrary, can also imagine as something as.. calling filter)
+[//]: # (this is really the way we should imagine a DisplayUsers component, isolated from shape of store)
 
-### Emoji Scale
+```js
+// app/reducers/MyBigAndImportantReducer.js
 
-# 🤔
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
 
+export const filteredUsers = state =>
+	filterUsers(selectDisplayFilters(state), selectUsers(state));
+```
+
+--
+
+```js
+// app/reducers/MyBigAndImportantReducer.js
+
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
+
+export const filteredUsers = state =>
+	filterUsers(selectDisplayFilters(state), selectUsers(state));
+```
+<br>
+```js
+// app/containers/DisplayUsersContainer.js
+
+const mapStateToProps = state => ({ users:  filteredUsers(state.MyBigAndImportantReducer)});
+```
+
+--
+```js
+// app/reducers/MyBigAndImportantReducer.js
+
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
+
+export const filteredUsers = state =>
+	filterUsers(selectDisplayFilters(state), selectUsers(state));
+```
+<br>
+```js
+// app/containers/DisplayUsersContainer.js
+
+const mapStateToProps = state => ({ users:  filteredUsers(state.MyBigAndImportantReducer)});
+```
+<br>
+```js
+// app/components/DisplayUsers.js
+
+render() {
+	return (<div>{...this.users}</div>);
+}
+```
+
+--
+<br><br><br>
+## export const selectData = ( ... )
+
+--
+<br><br><br>
+## ~~export~~ const selectData = ( ... )
+
+--
+
+[//]: # (essentially another selector)
+
+```js
+// app/reducers/MyBigAndImportantReducer.js
+
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
+
+export const filteredUsers = state =>
+	filterUsers(selectDisplayFilters(state), selectUsers(state));
+```
+<br>
+```js
+// app/containers/DisplayUsersContainer.js
+
+const mapStateToProps = state => ({ users:  filteredUsers(state.MyBigAndImportantReducer)});
+```
+<br>
+```js
+// app/components/DisplayUsers.js
+
+render() {
+	return (<div>{...this.users}</div>);
+}
+```
+
+--
+
+Insert reselect photo
+
+--
+
+#### From [Reselect Docs](https://github.com/reduxjs/reselect)
+
+- *Selectors can compute derived data, allowing Redux to store the minimal possible state.*
+- *Selectors are efficient. A selector is not recomputed unless one of its arguments changes.*
+- *Selectors are composable. They can be used as input to other selectors.*
+
+--
+
+[//]: # (takes an array of selectors as first arg and a transform function as second)
+[//]: # (but it's really simpler than that)
+
+
+#### From [Reselect Docs](https://github.com/reduxjs/reselect)
+
+- *Selectors can compute derived data, allowing Redux to store the minimal possible state.*
+- *Selectors are efficient. A selector is not recomputed unless one of its arguments changes.*
+- *Selectors are composable. They can be used as input to other selectors.*
+
+#### calls to → `createSelector()`
+--
+
+[//]: # (again, can imagine simpler filtering for filter users)
+
+```js
+// app/reducers/MyBigAndImportantReducer.js
+
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
+
+export const filteredUsers = state =>
+	filterUsers(selectDisplayFilters(state), selectUsers(state));
+```
+<br>
+```js
+import { createSelector } from 'reselect';
+
+const selectDisplayFilters = state => state.filters;
+const selectUsers = state => state.data.users;
+
+export const filteredUsers = createSelector(
+	[ selectDisplayFilters, selectUsers ],
+	(filters, users) => filterUsers(filters, users)
+);
+```
