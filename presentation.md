@@ -151,6 +151,10 @@ export ThisViewsComponent;
 
 --
 
+[//]: # (additional points not written down, nice benefit about using redux you don't have pass props throughout children, don't have logical components, you have logicless ones)
+[//]: # (almost following a modular sort of approach to component design)
+[//]: # (I haven't coded a ton on React without redux, but..)
+[//]: # (as soon as that happens you have components that are prime candidates for resusable components)
 [//]: # (with this, let's go back, lets talk about the second point)
 
 ### Why do we use Redux?
@@ -186,16 +190,6 @@ If you develop with...
 
 --
 
-[//]: # (Argue for whether this tweet is outdated? React Hooks released as of v. 16.8, Sema4 is on v. 16.2)
-
-## <img src="assets/dan-tweets.png" alt="Dan Tweets" height="622"/>
-
---
-
-## <img src="assets/squidward-tweets.png" alt="Squidward Tweets" height="622"/>
-
---
-
 [//]: # (introduce the general ideas of selectors here, that they can be just JS methods that pass basic data points)
 
 <br>
@@ -217,10 +211,25 @@ const mapStateToProps = state => ({ state: ...state.MyBigAndImportantReducer })
 
 <br><br>
 ```js
+const mapStateToProps = state => ({ state: ...state.MyBigAndImportantReducer })
+```
+
+<br><br>
+```js
 const mapStateToProps = state => ({
 	someData: selectSomeData(state.MyBigAndImportantReducer)
 })
 ```
+
+--
+
+[//]: # (Argue for whether this tweet is outdated? React Hooks released as of v. 16.8, Sema4 is on v. 16.2)
+
+## <img src="assets/dan-tweets.png" alt="Dan Tweets" height="622"/>
+
+--
+
+## <img src="assets/squidward-tweets.png" alt="Squidward Tweets" height="622"/>
 
 --
 
@@ -271,7 +280,6 @@ render() {
 
 [//]: # (Let's talk about how we can rate this, we can talk about basic, most common ways to rate with readability & necessity to edit it in the future quickly with future changes which we can't predict)
 [//]: # (Can rate it more specific to following the ideas about Redux we set forth and agreed upon earlier)
-[//]: # (But let's go ahead and put it on the Emoji scale, and talk about that)
 [//]: # (If you don't want to end up passing too many props down into distant children, using Redux to get around this, leaves me to believe at the very least we can make some further improvements)
 
 
@@ -386,16 +394,19 @@ render() {
 ```
 
 --
+
 <br><br><br>
 ## export const selectData = ( ... )
 
 --
+
 <br><br><br>
 ## ~~export~~ const selectData = ( ... )
 
 --
 
 [//]: # (essentially another selector)
+[//]: # (this is where I want to start talking about reselect)
 
 ```js
 // app/reducers/MyBigAndImportantReducer.js
@@ -423,7 +434,9 @@ render() {
 
 --
 
-Insert reselect photo
+## <img src="assets/reselect.png" alt="Reselect" height="262"/>
+<br><br>
+## <img src="assets/reselect-github.png" alt="Reselect GitHub" height="72"/>
 
 --
 
@@ -432,6 +445,8 @@ Insert reselect photo
 - *Selectors can compute derived data, allowing Redux to store the minimal possible state.*
 - *Selectors are efficient. A selector is not recomputed unless one of its arguments changes.*
 - *Selectors are composable. They can be used as input to other selectors.*
+
+[//]: # (a few memoization packages out there for js, basically the memoization here is a cache for the function, memoization package usually brings an algorithm, deterministic one to determine when to update cache)
 
 --
 
@@ -447,6 +462,13 @@ Insert reselect photo
 
 #### calls to → `createSelector()`
 --
+<br>
+
+#### Reselect API's &nbsp; `createSelector()`
+- arg: *array of selectors*
+- arg: *transform func*
+
+--
 
 [//]: # (again, can imagine simpler filtering for filter users)
 
@@ -459,8 +481,11 @@ const selectUsers = state => state.data.users;
 export const filteredUsers = state =>
 	filterUsers(selectDisplayFilters(state), selectUsers(state));
 ```
+↓
 <br>
 ```js
+// app/reducers/MyBigAndImportantReducer.js
+
 import { createSelector } from 'reselect';
 
 const selectDisplayFilters = state => state.filters;
@@ -471,3 +496,22 @@ export const filteredUsers = createSelector(
 	(filters, users) => filterUsers(filters, users)
 );
 ```
+
+--
+
+[//]: # (create selector can consume other create selectors)
+[//]: # (although in redux, should design applications so that technically you should derive everything from props, but you CAN still pass props)
+
+<br><br><br>
+
+### Couple of more things...
+
+--
+
+[//]: # (can pass through props, container will take props)
+
+<br><br><br>
+```js
+const mapStateToProps = (state, props) => ({ /* */ })
+```
+
